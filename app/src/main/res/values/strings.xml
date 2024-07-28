@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">IdeaGen</string>
+    <string name="home">Home</string>
+    <string name="feed">Feed</string>
+    <string name="archive">Archive</string>
 </resources>

@@ -11,7 +11,7 @@ import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedScreen(
+fun ArchiveScreen(
     context: Context,
     navController: NavController
 ) {
