@@ -10,11 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import threeax.productivity.ideagen.ui.theme.IdeaGenTheme
-import threeax.productivity.ideagen.pages.HomeScreen
-import kotlinx.serialization.*
-import threeax.productivity.ideagen.core.GenerateMOTD
+import kotlinx.serialization.Serializable
 import threeax.productivity.ideagen.pages.FeedScreen
+import threeax.productivity.ideagen.pages.HomeScreen
+import threeax.productivity.ideagen.ui.theme.IdeaGenTheme
 
 @Serializable
 object Home
@@ -37,8 +36,8 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
 
                     NavHost(navController = navController, startDestination = "Home") {
-                        composable("Home") { HomeScreen(this) }
-                        composable("Feed") { FeedScreen(this) }
+                        composable("Home") { HomeScreen(this@MainActivity) }
+                        composable("Feed") { FeedScreen(this@MainActivity) }
                         // Add more destinations similarly.
                     }
                 }

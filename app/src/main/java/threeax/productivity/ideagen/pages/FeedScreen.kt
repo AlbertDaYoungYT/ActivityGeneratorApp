@@ -1,5 +1,6 @@
 package threeax.productivity.ideagen.pages
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -14,17 +15,17 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import threeax.productivity.ideagen.core.NewTaskViewModel
 import threeax.productivity.ideagen.ui.components.NavigationBarKt
 import threeax.productivity.ideagen.ui.components.TopNavBar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FeedScreen() {
+fun FeedScreen(
+    context: Context
+) {
     val openAlertDialog = remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }

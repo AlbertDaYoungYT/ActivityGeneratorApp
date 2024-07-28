@@ -38,6 +38,14 @@ import threeax.productivity.ideagen.ui.components.SecondaryActivityComponent
 import threeax.productivity.ideagen.ui.components.TopNavBar
 
 
+fun onActivityClick() {
+
+}
+
+fun onActivityLongClick() {
+
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -136,9 +144,7 @@ fun HomeScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
             
-            Column(
-                //verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
+            Column {
                 Text(
                     text = "Today's Activities:",
                     fontSize = 32.sp,
@@ -147,7 +153,13 @@ fun HomeScreen(
                     modifier = Modifier
                         .padding(start = 16.dp)
                 )
-                PrimaryActivityComponent(title = "Try to touch grass today :3", reroll_count = 34, completion_count = 0)
+                PrimaryActivityComponent(
+                    title = "Try to touch grass today :3",
+                    reroll_count = 34,
+                    completion_count = 0,
+                    component_click = { onActivityClick() },
+                    component_long_click = { onActivityLongClick() }
+                )
                 SecondaryActivityComponent(title = "Take a fat dump in the ocean", reroll_count = 0, completion_count = 50)
             }
         }
