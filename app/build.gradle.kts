@@ -12,8 +12,8 @@ android {
         applicationId = "threeax.productivity.ideagen"
         minSdk = 30
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -57,6 +57,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("com.google.accompanist:accompanist-pager:0.28.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.28.0")
+    implementation("androidx.core:core-ktx:1.9.0")
 
 
     implementation(libs.androidx.core.ktx)

@@ -6,18 +6,29 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,18 +39,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import threeax.productivity.ideagen.R
+import threeax.productivity.ideagen.core.BottomSheetStateModal
 import threeax.productivity.ideagen.core.DialogNewTask
 import threeax.productivity.ideagen.core.NewTaskViewModel
-import threeax.productivity.ideagen.pages.ArchiveScreen
-import threeax.productivity.ideagen.pages.FeedScreen
-import threeax.productivity.ideagen.pages.HomeScreen
+import threeax.productivity.ideagen.core.Settings
+import threeax.productivity.ideagen.persistence.ActivityDBHandler
+import threeax.productivity.ideagen.persistence.ActivityModel
 import threeax.productivity.ideagen.ui.components.TopNavBar
+import threeax.productivity.ideagen.ui.pages.ArchiveScreen
+import threeax.productivity.ideagen.ui.pages.FeedScreen
+import threeax.productivity.ideagen.ui.pages.HomeScreen
 
 
 sealed class MainScreen(val route: String, @StringRes val resourceId: Int, @DrawableRes val iconId: Int) {
@@ -55,28 +70,72 @@ val items = listOf(
 )
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     context: Context,
-    navController: NavHostController
+    activityPressed: (Int?) -> Unit,
+    onSettingsClick: () -> Unit,
+    settings: Settings
 ) {
+    val navController = rememberNavController()
+
+    // on below line we are creating and initializing our array list
+    lateinit var activityList: List<ActivityModel>
+    activityList = ArrayList<ActivityModel>()
+
+    val activityDbHandler: ActivityDBHandler = ActivityDBHandler(context)
+    activityList = activityDbHandler.readActivities()
+
     val openAlertDialog = remember { mutableStateOf(false) }
+    val openEditDialog = remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val viewModel = remember { NewTaskViewModel() }
 
+
+    val sheetState = rememberModalBottomSheetState()
+    val showBottomSheet = remember { BottomSheetStateModal() }
+
+
     if (openAlertDialog.value) {
         DialogNewTask(
             onDismissRequest = { openAlertDialog.value = false },
             onConfirmation = {
                 openAlertDialog.value = false
+                activityDbHandler.addNewActivity(
+                    viewModel.title,
+                    viewModel.description
+                )
                 scope.launch {
-                    snackbarHostState.showSnackbar("Creating "+viewModel.title)
+                    snackbarHostState.showSnackbar("Created " + viewModel.title)
                 }
             },
             dialogTitle = "Create new Activity",
+            value = viewModel
+        )
+    }
+
+    if (openEditDialog.value) {
+        viewModel.title = activityList[showBottomSheet.activityIndex].activityName
+        viewModel.description = activityList[showBottomSheet.activityIndex].activityDescription
+
+        DialogNewTask(
+            onDismissRequest = { openEditDialog.value = false },
+            onConfirmation = {
+                openEditDialog.value = false
+                scope.launch {
+                    activityDbHandler.editActivity(
+                        activityList[showBottomSheet.activityIndex].activityId,
+                        viewModel.title,
+                        viewModel.description
+                    )
+                    snackbarHostState.showSnackbar("Edited "+viewModel.title)
+                }
+            },
+            dialogTitle = "Edit Activity",
             value = viewModel
         )
     }
@@ -86,7 +145,11 @@ fun MainScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         topBar = {
-            TopNavBar()
+            TopNavBar(
+                context,
+                settings,
+                onSettingsClick
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
@@ -138,19 +201,117 @@ fun MainScreen(
             composable(
                 MainScreen.Home.route
             ) {
-                HomeScreen(context, navController)
+                HomeScreen(
+                    context,
+                    navController,
+                    activityDbHandler,
+                    settings,
+                    showBottomSheet,
+                    activityPressed
+                )
             }
             composable(
                 MainScreen.Feed.route
             ) {
-                FeedScreen(context, navController)
+                FeedScreen(
+                    context,
+                    navController,
+                    activityPressed
+                )
             }
             composable(
                 MainScreen.Archive.route
             ) {
-                ArchiveScreen(context, navController)
+                ArchiveScreen(
+                    context,
+                    navController,
+                    activityPressed
+                )
+            }
+        }
+
+        if (showBottomSheet.showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet.showBottomSheet = false
+                },
+                sheetState = sheetState
+            ) {
+                Column {
+                    ListItem(
+                        headlineContent = { Text("View") },
+                        leadingContent = {
+                            Icon(
+                                Icons.Filled.MoreVert,
+                                contentDescription = "Localized description"
+                            )
+                        },
+                        modifier = Modifier.clickable {
+                            showBottomSheet.showBottomSheet = false
+                            activityPressed(showBottomSheet.activityId)
+                        }
+                    )
+                    ListItem(
+                        headlineContent = { Text("Complete") },
+                        leadingContent = {
+                            Icon(
+                                Icons.Filled.Done,
+                                contentDescription = "Localized description"
+                            )
+                        },
+                        modifier = Modifier.clickable {
+                            showBottomSheet.showBottomSheet = false
+                        }
+                    )
+                    ListItem(
+                        headlineContent = { Text("Reroll") },
+                        leadingContent = {
+                            Icon(
+                                Icons.Filled.Refresh,
+                                contentDescription = "Localized description"
+                            )
+                        }
+                    )
+                    ListItem(
+                        headlineContent = { Text("Edit") },
+                        leadingContent = {
+                            Icon(
+                                Icons.Filled.Create,
+                                contentDescription = "Localized description"
+                            )
+                        },
+                        modifier = Modifier.clickable {
+                            showBottomSheet.showBottomSheet = false
+                            openEditDialog.value = true
+                        }
+                    )
+                    ListItem(
+                        headlineContent = { Text("Archive") },
+                        leadingContent = {
+                            Icon(
+                                painterResource(id = R.drawable.inventory_24px),
+                                contentDescription = "Localized description"
+                            )
+                        },
+                        modifier = Modifier.clickable {
+                            showBottomSheet.showBottomSheet = false
+                        }
+                    )
+                    ListItem(
+                        headlineContent = { Text("Delete") },
+                        leadingContent = {
+                            Icon(
+                                Icons.Filled.Delete,
+                                contentDescription = "Localized description"
+                            )
+                        },
+                        modifier = Modifier.clickable {
+                            activityDbHandler.deleteActivity(activityList[showBottomSheet.activityIndex].activityId)
+                            showBottomSheet.showBottomSheet = false
+                        }
+                    )
+                }
             }
         }
     }
-
 }
