@@ -36,8 +36,8 @@ import threeax.productivity.ideagen.core.BottomSheetStateModal
 import threeax.productivity.ideagen.core.GenerateQOTD
 import threeax.productivity.ideagen.core.Settings
 import threeax.productivity.ideagen.persistence.ActivityDBHandler
+import threeax.productivity.ideagen.ui.components.FutureActivityComponent
 import threeax.productivity.ideagen.ui.components.PrimaryActivityComponent
-import threeax.productivity.ideagen.ui.components.SecondaryActivityComponent
 
 
 fun onActivityClick() {
@@ -57,6 +57,7 @@ fun HomeScreen(
 ) {
     val currentQOTD = GenerateQOTD(context, settings)
     val todaysActivities = Generator(context, settings).getTodaysActivities() // TODO: Make this
+    val tomorrowsActivities = Generator(context, settings).getFutureActivities()
 
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -137,7 +138,7 @@ fun HomeScreen(
 
                 HorizontalDivider(
                     modifier = Modifier
-                        .padding(top = 16.dp),
+                        .padding(top = 16.dp, bottom = 16.dp),
                     thickness = 2.dp,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -181,21 +182,37 @@ fun HomeScreen(
                     }
                 }
             } else if (todaysActivities.size >= 1) {
-                item {
+                items(todaysActivities.size) {it ->
                     PrimaryActivityComponent(
-                        id = todaysActivities[0].activityId,
+                        id = todaysActivities[it].activityId,
                         component_click = {
-                            activityPressed(todaysActivities[0].activityId)
+                            activityPressed(todaysActivities[it].activityId)
                         },
                         component_long_click = {
                             showBottomSheet.showBottomSheet = true
-                            showBottomSheet.activityId = todaysActivities[0].activityId
-                            showBottomSheet.activityIndex = 0
+                            showBottomSheet.activityId = todaysActivities[it].activityId
+                            showBottomSheet.activityIndex = it
                         },
-                        value = todaysActivities[0]
+                        value = todaysActivities[it],
+                        index = it
                     )
                 }
-                if (todaysActivities.size > 1) {
+                items(tomorrowsActivities.size) {
+                    FutureActivityComponent(
+                        id = tomorrowsActivities[it].activityId,
+                        component_click = {
+                            activityPressed(tomorrowsActivities[it].activityId)
+                        },
+                        component_long_click = {
+                            showBottomSheet.showBottomSheet = true
+                            showBottomSheet.activityId = tomorrowsActivities[it].activityId
+                            showBottomSheet.activityIndex = it
+                        },
+                        settings = settings,
+                        value = tomorrowsActivities[it]
+                    )
+                }
+                /*if (todaysActivities.size > 1) {
                     items(2) { it ->
                         var index = it + 1
                         if (todaysActivities.size > index) {
@@ -210,7 +227,7 @@ fun HomeScreen(
                             )
                         }
                     }
-                }
+                }*/
             }
         }
     }
