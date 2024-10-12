@@ -43,4 +43,8 @@ class Settings(private val context: Context) {
             apply()
         }
     }
+
+    fun getString(id: String, value: String): Any {
+        return sharedPreferences.getString(id, value) ?: value
+    }
 }

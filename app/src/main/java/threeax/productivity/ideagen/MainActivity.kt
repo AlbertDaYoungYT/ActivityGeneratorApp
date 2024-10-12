@@ -16,12 +16,18 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.CoroutineScope
 import threeax.productivity.ideagen.core.Notifiers
 import threeax.productivity.ideagen.core.Settings
+import threeax.productivity.ideagen.core.server.UploadActivity
+import threeax.productivity.ideagen.core.server.UploadActivityResponseParser
+import threeax.productivity.ideagen.core.server.UploadActivityViewModel
 import threeax.productivity.ideagen.ui.screens.FullActivityScreen
 import threeax.productivity.ideagen.ui.screens.MainScreen
 import threeax.productivity.ideagen.ui.screens.SettingsScreen
 import threeax.productivity.ideagen.ui.theme.IdeaGenTheme
+import java.util.Timer
+import java.util.TimerTask
 
 
 class MainActivity : ComponentActivity() {
@@ -44,6 +50,14 @@ class MainActivity : ComponentActivity() {
         settings.loadSettings()
 
         //TODO: Add splash screen
+
+        // Start threads
+        val timer = Timer()
+        timer.schedule(object : TimerTask() {
+            override fun run() {
+                UploadActivityViewModel(UploadActivity(UploadActivityResponseParser(), settings)).syncActivities(this@MainActivity)
+            }
+        }, 0, 10000)
 
         enableEdgeToEdge()
 

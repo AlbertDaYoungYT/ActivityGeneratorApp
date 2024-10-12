@@ -5,11 +5,17 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.Build
+import android.provider.Settings
+import androidx.compose.ui.platform.LocalContext
+import java.security.AccessController.getContext
 
 class ActivityDBHandler
 // creating a constructor for our database handler.
     (context: Context?) :
     SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
+    private val context: Context = context!!
+
     // below method is for creating a database by running a sqlite query
     override fun onCreate(db: SQLiteDatabase) {
         // on below line we are creating an sqlite query and we are
@@ -166,6 +172,37 @@ class ActivityDBHandler
         return cursorCourses.count
     }
 
+    fun readPublicActivities(): ArrayList<PublicActivityModel> {
+        val db = this.readableDatabase
+        val cursorCourses: Cursor = db.rawQuery("SELECT * FROM $TABLE_NAME WHERE $ARCHIVED_COL = 0", null)
+        val courseModelArrayList: ArrayList<PublicActivityModel> = ArrayList()
+
+        val deviceId = DeviceIdModel(
+            Settings.Secure.getString(this.context.contentResolver, Settings.Secure.ANDROID_ID),
+            Build.MODEL
+        )
+
+        if (cursorCourses.moveToFirst()) {
+            do {
+                courseModelArrayList.add(
+                    PublicActivityModel(
+                        deviceId,
+                        cursorCourses.getString(0).toInt(),
+                        cursorCourses.getString(1),
+                        cursorCourses.getString(2),
+                        cursorCourses.getString(3).toInt(),
+                        cursorCourses.getString(4).toInt(),
+                        cursorCourses.getString(5).toBoolean(),
+                        cursorCourses.getString(6).toInt()
+                    )
+                )
+            } while (cursorCourses.moveToNext())
+        }
+
+        cursorCourses.close()
+        return courseModelArrayList
+    }
+
     companion object {
         // creating a constant variables for our database.
         // below variable is for our database name.
@@ -191,4 +228,20 @@ data class ActivityModel(
     var activityCompletions: Int,
     var activityArchived: Boolean,
     var activityCreation: Int
+)
+
+data class PublicActivityModel(
+    var activityOwner: DeviceIdModel,
+    var activityId: Int,
+    var activityName: String,
+    var activityDescription: String,
+    var activityReRoll: Int,
+    var activityCompletions: Int,
+    var activityArchived: Boolean,
+    var activityCreation: Int
+)
+
+data class DeviceIdModel(
+    var deviceId: String,
+    var deviceName: String
 )

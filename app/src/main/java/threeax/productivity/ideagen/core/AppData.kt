@@ -21,6 +21,7 @@ data object AppData {
         SettingsDataCategory("Ui", "ui"),
         SettingsDataCategory("Notifications", "notifications"),
         SettingsDataCategory("Data", "data"),
+        SettingsDataCategory("Server", "server"),
         SettingsDataCategory("Feedback", "feedback"),
         SettingsDataCategory("About", "about"),
         SettingsDataCategory("Debug", "debug"),
@@ -47,6 +48,12 @@ data object AppData {
 
         SettingsData("data", "exportData", "false", "Export", "Export data", "button"),
         SettingsData("data","importData", "false", "Import", "Import data", "button"),
+
+        SettingsData("server","enableServer", "false", "Enable", "Server Enable", "switch"),
+        SettingsData("server","serverUrl", "192.168.87.107", "URL", "Server Url", "string"),
+        SettingsData("server","serverPort", "9200", "Port", "Server Port", "number"),
+        SettingsData("server","serverAutoPublic", "false", "Auto Publish", "Automatically publish activities", "switch"),
+        
         SettingsData("data","clearData", "false", "Clear data", "Clear all data", "button", changeCallback = {  }),
         SettingsData("feedback","feedback", "false", "Feedback", "Send feedback", "button", changeCallback = {  }),
         SettingsData("about","", "", "", "", "about"),

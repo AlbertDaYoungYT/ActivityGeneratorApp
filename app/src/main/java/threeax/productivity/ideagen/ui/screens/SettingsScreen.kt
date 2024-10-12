@@ -193,7 +193,7 @@ fun SettingsScreen(
                                             //settings.loadSettings()
                                         }
                                     )
-                                } else if (itData.type == "text") {
+                                } else if (itData.type == "string") {
                                     //TODO: Add text
                                 } else if (itData.type == "number") {
                                     SettingsNumber(

@@ -7,8 +7,8 @@ import com.google.gson.reflect.TypeToken
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-data class QOTDData(val text: String, val from: String) // Replace with your data class
-data class MOTDData(val text: String) // Replace with your data class
+data class QOTDData(val text: String, val from: String)
+data class MOTDData(val text: String)
 
 class JsonLoader(private val context: Context) {
     fun loadQOTDJsonData(file: String): List<QOTDData> {
