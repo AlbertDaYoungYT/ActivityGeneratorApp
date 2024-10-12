@@ -260,6 +260,7 @@ fun MainScreen(
                             )
                         },
                         modifier = Modifier.clickable {
+                            activityDbHandler.completeActivity(showBottomSheet.activityId)
                             showBottomSheet.showBottomSheet = false
                         }
                     )
@@ -270,6 +271,10 @@ fun MainScreen(
                                 Icons.Filled.Refresh,
                                 contentDescription = "Localized description"
                             )
+                        },
+                        modifier = Modifier.clickable {
+                            activityDbHandler.rerollActivity(showBottomSheet.activityId)
+                            showBottomSheet.showBottomSheet = false
                         }
                     )
                     ListItem(
@@ -294,6 +299,7 @@ fun MainScreen(
                             )
                         },
                         modifier = Modifier.clickable {
+                            //activityDbHandler.archiveActivity(showBottomSheet.activityId)
                             showBottomSheet.showBottomSheet = false
                         }
                     )

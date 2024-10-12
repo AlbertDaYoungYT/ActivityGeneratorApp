@@ -30,6 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import threeax.productivity.ideagen.core.Settings
+import threeax.productivity.ideagen.core.obfuscate
 import threeax.productivity.ideagen.persistence.ActivityModel
 
 
@@ -39,13 +41,14 @@ fun PrimaryActivityComponent(
     id: Int,
     component_click: () -> Unit,
     component_long_click: () -> Unit,
-    value: ActivityModel
+    value: ActivityModel,
+    index: Int
 ) {
     Box(
         modifier = Modifier
-            .padding(start = 16.dp, top = 16.dp, end = 16.dp)
+            .padding(start = 16.dp, top = 4.dp, end = 16.dp)
             .padding(bottom = 4.dp)
-            .clip(shape = RoundedCornerShape(32.dp, 32.dp, 8.dp, 8.dp))
+            .clip(shape = if (index == 0) RoundedCornerShape(32.dp, 32.dp, 8.dp, 8.dp) else RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.primaryContainer)
             .combinedClickable(
                 onClick = {
@@ -229,6 +232,53 @@ fun SecondaryActivityComponent(
                 )
             }
             */
+        }
+    }
+}
+
+@Composable
+fun FutureActivityComponent(
+    id: Int,
+    component_click: () -> Unit,
+    component_long_click: () -> Unit,
+    settings: Settings,
+    value: ActivityModel
+) {
+    Box(
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp)
+            .padding(bottom = 4.dp, top = 4.dp)
+            .clip(shape = RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+    )
+    {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp, 16.dp, 16.dp, 16.dp)
+                .sizeIn(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+
+        ) {
+            Text(
+                text = if (settings.getSetting("obfuscateFutureTasks") == "true") obfuscate(value.activityName) else value.activityName,
+                fontSize = 19.sp,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 4,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+                //fontWeight = FontWeight.SemiBold
+            )
+            if (value.activityDescription != "") {
+                Text(
+                    text = if (settings.getSetting("obfuscateFutureTasks") == "true") obfuscate(value.activityDescription) else value.activityDescription,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Light,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
         }
     }
 }

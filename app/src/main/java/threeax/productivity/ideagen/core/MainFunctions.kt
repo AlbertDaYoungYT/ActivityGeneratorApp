@@ -50,3 +50,9 @@ fun openFeedbackLink() {
     val url = "https://github.com/AlbertDaYoungYT/IdeaGen/issues"
     uri.openUri(url)
 }
+
+fun obfuscate(text: String): String {
+    var text = text.replace(Regex("[aeiouAEIOU]"), "*")
+    text = text.replace(Regex("[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]"), ".")
+    return text
+}
